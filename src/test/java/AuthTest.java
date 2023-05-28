@@ -33,4 +33,59 @@ public class AuthTest {
                 .shouldBe(Condition.visible, Duration.ofSeconds(15));
     }
 
+    @Test
+    void shouldNotLoginRegisteredByBlockedUser() {
+        var BlockedUser = DataGenerator.Registration.getRegisteredUser("blocked");
+        $("[data-test-id='login'] input").setValue(BlockedUser.getLogin());
+        $("[data-test-id='password'] input").setValue(BlockedUser.getPassword());
+        $("button.button").click();
+        $("[data-test-id='error-notification'] .notification__content")
+                .shouldHave(Condition.text("Ошибка! Пользователь заблокирован"))
+                .shouldHave(Condition.visible, Duration.ofSeconds(15));
+    }
+
+    @Test
+    void shouldShowErrorForWrongLogin() {
+        var registeredUser = DataGenerator.Registration.getRegisteredUser("active");
+        var wrongLogin = DataGenerator.getRandomLogin();
+        $("[data-test-id='login'] input").setValue(wrongLogin);
+        $("[data-test-id='password'] input").setValue(registeredUser.getPassword());
+        $("button.button").click();
+        $("[data-test-id='error-notification'] .notification__content")
+                .shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"))
+                .shouldBe(Condition.visible, Duration.ofSeconds(15));
+    }
+
+    @Test
+    void shouldShowErrorForWrongPassword() {
+        var registeredUser = DataGenerator.Registration.getRegisteredUser("active");
+        var wrongPassword = DataGenerator.getRandomPassword();
+        $("[data-test-id='login'] input").setValue(registeredUser.getLogin());
+        $("[data-test-id='password'] input").setValue(wrongPassword);
+        $("button.button").click();
+        $("[data-test-id='error-notification'] .notification__content")
+                .shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"))
+                .shouldBe(Condition.visible, Duration.ofSeconds(15));
+    }
+    @Test
+    void shouldNotLoginWithEmptyLogin() {
+        var registeredUser = DataGenerator.Registration.getRegisteredUser("active");
+        $("[data-test-id='password'] input").setValue(registeredUser.getPassword());
+        $("button.button").click();
+        $("[data-test-id=login] span.input__sub").shouldHave
+                        (Condition.exactText("Поле обязательно для заполнения"))
+
+                .shouldBe(Condition.visible);
+    }
+
+    @Test
+    void shouldNotLoginWithEmptyPassword() {
+        var registeredUser = DataGenerator.Registration.getRegisteredUser("active");
+        $("[data-test-id='login'] input").setValue(registeredUser.getLogin());
+        $("button.button").click();
+        $("[data-test-id=password] span.input__sub").shouldHave
+                        (Condition.exactText("Поле обязательно для заполнения"))
+
+                .shouldBe(Condition.visible);
+    }
 }
